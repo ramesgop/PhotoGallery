@@ -41,7 +41,7 @@ public class PhotosAdapter extends RecyclerView.Adapter<PhotosAdapter.PhotosView
     @Override
     public void onBindViewHolder(PhotosViewHolder viewHolder, int position) {
         Photo currentPhoto = mPhotos.get(position);
-
+        viewHolder.image.setImageBitmap(null);
         new ImageLoader(viewHolder.image).execute(currentPhoto.getPhotoUrl());
     }
 
@@ -77,4 +77,7 @@ public class PhotosAdapter extends RecyclerView.Adapter<PhotosAdapter.PhotosView
         }
     }
 
+    public void addPhotos(ArrayList<Photo> photos) {
+        mPhotos.addAll(photos);
+    }
 }

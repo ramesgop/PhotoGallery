@@ -3,16 +3,12 @@ package com.example.ramesgop.photogallery;
 import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.widget.Button;
 
 import org.json.JSONArray;
@@ -26,6 +22,9 @@ public class MainActivity extends AppCompatActivity {
     private static final String LOG_TAG = "MainActivity";
     private ProgressDialog progressDialog;
     private RecyclerView photosList;
+    private PhotosAdapter photosAdapter;
+    private GridLayoutManager layoutManager;
+    private int pagesFetched = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,18 +38,42 @@ public class MainActivity extends AppCompatActivity {
         photosbutton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                new GetPhotos().execute();
+                pagesFetched++;
+                new GetPhotos().execute(pagesFetched);
             }
         });
 
         photosList = this.findViewById(R.id.list_photos);
         photosList.setHasFixedSize(true);
 
-        GridLayoutManager layoutManager = new GridLayoutManager(this, 3);
+        layoutManager = new GridLayoutManager(this, 3);
         photosList.setLayoutManager(layoutManager);
+
+        photosAdapter = new PhotosAdapter(new ArrayList<Photo>());
+        photosList.setAdapter(photosAdapter);
+
+        photosList.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+
+                int visibleItemCount = layoutManager.getChildCount();
+                int totalItemCount = layoutManager.getItemCount();
+                int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
+
+                if ((visibleItemCount + firstVisibleItemPosition) >= totalItemCount) {
+                    loadNextPage();
+                }
+            }
+        });
     }
 
-    private class GetPhotos extends AsyncTask<Void, Void, ArrayList<Photo>> {
+    private void loadNextPage() {
+        pagesFetched++;
+        new GetPhotos().execute(pagesFetched);
+    }
+
+    private class GetPhotos extends AsyncTask<Integer, Void, ArrayList<Photo>> {
 
         @Override
         protected void onPreExecute() {
@@ -63,14 +86,16 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        protected ArrayList<Photo> doInBackground(Void... arg0) {
+        protected ArrayList<Photo> doInBackground(Integer... arg0) {
             ArrayList<Photo> photos = new ArrayList<>();
+
+            int page = arg0[0];
 
             // Creating service handler class instance
             ServiceHandler serviceHandler = new ServiceHandler();
 
             // Making a request to ISSUES_URL and getting response
-            String jsonStr = serviceHandler.makeServiceCall();
+            String jsonStr = serviceHandler.makeServiceCall("kittens",30, page);
 
             Log.d(LOG_TAG, "Response " + " = " + jsonStr);
             if(jsonStr != null)
@@ -116,7 +141,9 @@ public class MainActivity extends AppCompatActivity {
                 progressDialog.dismiss();
             }
 
-            photosList.setAdapter(new PhotosAdapter(result));
+            //photosList.setAdapter(new PhotosAdapter(result));
+            photosAdapter.addPhotos(result);
+            photosAdapter.notifyDataSetChanged();
         }
 
     }
