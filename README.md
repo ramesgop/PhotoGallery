@@ -24,7 +24,7 @@ AndroidStudio, Android SDK
 6. RecyclerView is used for displaying the Images in a GridLayout (using GridLayoutManager). RecyclerView will attempt to reuse existing view instead of recreating.
 7. PhotosAdapter (RecyclerView.Adapter) is the adapter used for displaying the photos in the RecyclerView. this also implements the ViewHolder pattern so that views are cached and we save on lookups.
 8. Images in each photo_item (List item) are loaded in background thread. Using Executor to run the task for reading the image from the Photo Url and then displaying in the ImageView.
-   Not using an AsyncTask as by default AsyncTasks run on the same thread so having multiple threads for downloading images will give better performance results in terms of faster loading.
+   Prefered Executor over AsyncTask as by default AsyncTasks run on the same thread so having multiple threads for downloading images will give better performance results in terms of faster loading.
 9. ScrollListener is added to RecyclerView in MainActivity to detect when we scroll to end and fetch more pages.
 
 ## Sequence flow
@@ -35,6 +35,10 @@ AndroidStudio, Android SDK
 4. If we detect a scroll near to the end of currently fetched items, make call to fetch more results. pagesFetched in MainActivity is used to keep track of results fetched.
    Results received are added to end of the PhotosAdapter.
 
+## TODO
+1. Add caching for Images (using LRUCache) so that we do not download same images again in case we scroll back.
+2. Use interfaces for binding the different objects together. Currently directly using classes, move to Interfaces to abstract out the class implementation and dependency.
+3. More testing.
 
 ## Authors
 
