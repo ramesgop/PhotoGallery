@@ -36,7 +36,7 @@ AndroidStudio, Android SDK
    Results received are added to end of the PhotosAdapter.
 
 ## TODO
-1. Add caching for Images (using LRUCache) so that we do not download same images again in case we scroll back.
+1. Add caching for Images (using disk) so that we do not download same images again in case we scroll back.
 2. Use interfaces for binding the different objects together. Currently directly using classes, move to Interfaces to abstract out the class implementation and dependency.
 3. More testing.
 
