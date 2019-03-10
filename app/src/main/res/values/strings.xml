@@ -5,4 +5,5 @@
     <string name="get_photos">Get Photos</string>
 
     <string name="photo_url">http://farm%1$s.static.flickr.com/%2$s/%3$s_%4$s.jpg</string>
+    <string name="search_hint">Search</string>
 </resources>
