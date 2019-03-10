@@ -38,7 +38,7 @@ public class GetPhotosTask implements Runnable {
         mCallback.onPhotosAvailable(photos);
     }
 
-    private ArrayList<Photo> parsePhotos(String jsonStr) {
+    public ArrayList<Photo> parsePhotos(String jsonStr) {
         ArrayList<Photo> photos = new ArrayList<>();
 
         if(jsonStr != null)
@@ -66,7 +66,7 @@ public class GetPhotosTask implements Runnable {
         return photos;
     }
 
-    private Photo getPhoto(JSONObject jsonObject) {
+    public Photo getPhoto(JSONObject jsonObject) {
         Photo photo = null;
         try {
             String id = jsonObject.getString("id");
