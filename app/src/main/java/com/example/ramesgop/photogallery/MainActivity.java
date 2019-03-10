@@ -2,24 +2,17 @@ package com.example.ramesgop.photogallery;
 
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import java.util.ArrayList;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -124,72 +117,5 @@ public class MainActivity extends AppCompatActivity implements IPhotoSearchCallb
             progressDialog.show();
         }
         isFetchingImages = true;
-    }
-
-    private class GetPhotos extends AsyncTask<Integer, Void, ArrayList<Photo>> {
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            // Showing progress dialog
-            showProgressDialog();
-        }
-
-        @Override
-        protected ArrayList<Photo> doInBackground(Integer... arg0) {
-            ArrayList<Photo> photos = new ArrayList<>();
-            int page = arg0[0];
-
-            // Creating service handler class instance
-            ServiceHandler serviceHandler = new ServiceHandler();
-
-            // Making a request to FLICKER_API_URL and getting response
-            String jsonStr = serviceHandler.makeServiceCall("kittens", RESULTS_PER_PAGE, page);
-
-            //Log.d(LOG_TAG, "Response " + " = " + jsonStr);
-            if(jsonStr != null)
-            {
-                try
-                {
-                    JSONObject result = new JSONObject(jsonStr);
-                    //Parse and add the photo objects
-                    JSONArray jsonArrayObj = result.getJSONObject("photos").getJSONArray("photo");
-
-                    for(int i=0; i<jsonArrayObj.length(); i++)
-                    {
-                        JSONObject jsonObject = jsonArrayObj.getJSONObject(i);
-                        String id = jsonObject.getString("id");
-                        String farm = jsonObject.getString("farm");
-                        String server = jsonObject.getString("server");
-                        String secret = jsonObject.getString("secret");
-
-                        Photo photo = new Photo(id, farm,server,secret);
-                        photos.add(photo);
-                    }
-                }
-                catch(JSONException e)
-                {
-                    Log.e(LOG_TAG, "Exception while parsing issues json object");
-                }
-            }
-
-            return photos;
-        }
-
-        @Override
-        protected void onPostExecute(ArrayList<Photo> result) {
-            super.onPostExecute(result);
-            // Dismiss the progress dialog
-            if (progressDialog.isShowing()) {
-                progressDialog.dismiss();
-            }
-
-            int count = photosAdapter.getItemCount();
-            photosAdapter.addPhotos(result);
-            photosAdapter.notifyItemRangeInserted(count, RESULTS_PER_PAGE);
-
-            isFetchingImages = false;
-        }
-
     }
 }

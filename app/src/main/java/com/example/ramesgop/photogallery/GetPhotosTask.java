@@ -7,6 +7,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
 
 public class GetPhotosTask implements Runnable {
 
@@ -32,6 +33,14 @@ public class GetPhotosTask implements Runnable {
         String jsonStr = serviceHandler.makeServiceCall(searchText, resultsPerPage, page);
 
         //Log.d(LOG_TAG, "Response " + " = " + jsonStr);
+        photos = parsePhotos(jsonStr);
+
+        mCallback.onPhotosAvailable(photos);
+    }
+
+    private ArrayList<Photo> parsePhotos(String jsonStr) {
+        ArrayList<Photo> photos = new ArrayList<>();
+
         if(jsonStr != null)
         {
             try
@@ -43,20 +52,32 @@ public class GetPhotosTask implements Runnable {
                 for(int i=0; i<jsonArrayObj.length(); i++)
                 {
                     JSONObject jsonObject = jsonArrayObj.getJSONObject(i);
-                    String id = jsonObject.getString("id");
-                    String farm = jsonObject.getString("farm");
-                    String server = jsonObject.getString("server");
-                    String secret = jsonObject.getString("secret");
 
-                    Photo photo = new Photo(id, farm,server,secret);
+                    Photo photo = getPhoto(jsonObject);
                     photos.add(photo);
                 }
             }
             catch(JSONException e)
             {
-                Log.e(LOG_TAG, "Exception while parsing issues json object");
+                Log.e(LOG_TAG, "Exception while parsing photos json object");
             }
         }
-        mCallback.onPhotosAvailable(photos);
+
+        return photos;
+    }
+
+    private Photo getPhoto(JSONObject jsonObject) {
+        Photo photo = null;
+        try {
+            String id = jsonObject.getString("id");
+            String farm = jsonObject.getString("farm");
+            String server = jsonObject.getString("server");
+            String secret = jsonObject.getString("secret");
+            photo = new Photo(id, farm,server,secret);
+        }
+        catch (Exception e) {
+            Log.e(LOG_TAG, "Exception while parsing photo");
+        }
+        return photo;
     }
 }
