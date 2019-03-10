@@ -17,7 +17,7 @@ public class PhotosAdapter extends RecyclerView.Adapter<PhotosAdapter.PhotosView
     private final String LOG_TAG = "PhotosAdapter";
     private ArrayList<Photo> mPhotos;
     private ExecutorService mExecutorService;
-    private static final int NUM_THREADS = 5;
+    private static final int NUM_THREADS = 15;
 
     public static class PhotosViewHolder extends RecyclerView.ViewHolder{
 

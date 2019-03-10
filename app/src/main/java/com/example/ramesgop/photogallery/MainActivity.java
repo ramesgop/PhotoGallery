@@ -51,17 +51,17 @@ public class MainActivity extends AppCompatActivity implements IPhotoSearchCallb
         photosbutton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //startFetching the results
+                //start Fetching the results
                 pagesFetched = 1;
-                //new GetPhotos().execute(pagesFetched);
                 searchText = searchEditText.getText().toString();
                 searchEditText.clearFocus();
                 InputMethodManager imm = (InputMethodManager)getSystemService(
                         Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(searchEditText.getWindowToken(), 0);
 
-                showProgressDialog();
                 photosAdapter.clearDataSet();
+
+                showProgressDialog();
                 mExecutor.submit(new GetPhotosTask(searchText, pagesFetched, RESULTS_PER_PAGE, MainActivity.this ));
             }
         });
@@ -93,7 +93,7 @@ public class MainActivity extends AppCompatActivity implements IPhotoSearchCallb
 
     private void loadNextPage() {
         pagesFetched++;
-        //new GetPhotos().execute(pagesFetched);
+        isFetchingImages = true;
         mExecutor.submit(new GetPhotosTask(searchText, pagesFetched, RESULTS_PER_PAGE, this));
     }
 
@@ -102,7 +102,7 @@ public class MainActivity extends AppCompatActivity implements IPhotoSearchCallb
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                if (progressDialog.isShowing()) {
+                if (progressDialog != null && progressDialog.isShowing()) {
                     progressDialog.dismiss();
                 }
 
@@ -166,8 +166,6 @@ public class MainActivity extends AppCompatActivity implements IPhotoSearchCallb
                         Photo photo = new Photo(id, farm,server,secret);
                         photos.add(photo);
                     }
-
-
                 }
                 catch(JSONException e)
                 {
@@ -193,58 +191,5 @@ public class MainActivity extends AppCompatActivity implements IPhotoSearchCallb
             isFetchingImages = false;
         }
 
-    }
-
-    private class GetPhotosTask implements Runnable {
-
-        private String searchText;
-        private int page;
-        private int resultsPerPage;
-        private IPhotoSearchCallback mCallback;
-
-        private GetPhotosTask(String serchText, int page, int resultsPerPage, IPhotoSearchCallback callback) {
-            this.searchText = serchText;
-            this.page = page;
-            this.resultsPerPage = resultsPerPage;
-            this.mCallback = callback;
-        }
-
-        @Override
-        public void run() {
-            ArrayList<Photo> photos = new ArrayList<>();
-            ServiceHandler serviceHandler = new ServiceHandler();
-
-            // Making a request to FLICKER_API_URL and getting response
-            String jsonStr = serviceHandler.makeServiceCall(searchText, resultsPerPage, page);
-
-            //Log.d(LOG_TAG, "Response " + " = " + jsonStr);
-            if(jsonStr != null)
-            {
-                try
-                {
-                    JSONObject result = new JSONObject(jsonStr);
-                    //Parse and add the photo objects
-                    JSONArray jsonArrayObj = result.getJSONObject("photos").getJSONArray("photo");
-
-                    for(int i=0; i<jsonArrayObj.length(); i++)
-                    {
-                        JSONObject jsonObject = jsonArrayObj.getJSONObject(i);
-                        String id = jsonObject.getString("id");
-                        String farm = jsonObject.getString("farm");
-                        String server = jsonObject.getString("server");
-                        String secret = jsonObject.getString("secret");
-
-                        Photo photo = new Photo(id, farm,server,secret);
-                        photos.add(photo);
-                    }
-                }
-                catch(JSONException e)
-                {
-                    Log.e(LOG_TAG, "Exception while parsing issues json object");
-                }
-            }
-
-            mCallback.onPhotosAvailable(photos);
-        }
     }
 }
