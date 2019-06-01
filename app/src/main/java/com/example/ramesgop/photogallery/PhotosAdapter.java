@@ -9,9 +9,12 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import javax.net.ssl.HttpsURLConnection;
 
 public class PhotosAdapter extends RecyclerView.Adapter<PhotosAdapter.PhotosViewHolder> {
     private final String LOG_TAG = "PhotosAdapter";
@@ -68,8 +71,14 @@ public class PhotosAdapter extends RecyclerView.Adapter<PhotosAdapter.PhotosView
         @Override
         public void run() {
             Bitmap image = null;
+            URL imageUrl;
             try {
-                InputStream in = new java.net.URL(url).openStream();
+                imageUrl = new URL(url);
+                HttpsURLConnection httpURLConnection = (HttpsURLConnection) imageUrl.openConnection();
+                httpURLConnection.setDoInput(true);
+                httpURLConnection.connect();
+
+                InputStream in = httpURLConnection.getInputStream();
                 image = BitmapFactory.decodeStream(in);
             }
             catch (Exception e) {
